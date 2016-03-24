@@ -32,7 +32,7 @@ func NewPipeTimer(apiOptions []pipedrive.Option, options ...Option) (*Pipetimer,
 		}
 	}
 
-	plID, err := timer.api.GetPipelineIdByName(timer.name)
+	plID, err := timer.api.GetPipelineIDByName(timer.name)
 	if err != nil {
 		return nil, err
 	}

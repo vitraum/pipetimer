@@ -12,7 +12,7 @@ import (
 func (t *Pipetimer) FetchDeals(filterName string, filterID int) (pipedrive.Deals, error) {
 	if filterName != "" && filterID == 0 {
 		var err error
-		filterID, err = t.api.GetFilterIdByName(filterName)
+		filterID, err = t.api.GetFilterIDByName(filterName)
 		if err != nil {
 			return nil, err
 		}
