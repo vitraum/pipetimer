@@ -20,6 +20,7 @@ type DataProvider interface {
 	ID() string
 	Age() time.Duration
 	Status() string
+	Source() string
 	DealUpdates() pipedrive.DealFlowUpdates
 	Value() float64
 	DecisionTime() time.Time
@@ -40,6 +41,7 @@ func (w *PipeWriter) WriteHeader() error {
 	columnNames := []string{
 		"Lead ID",
 		"Status",
+		"Quelle",
 		"Endscheidungsdatum",
 		"Lead Alter",
 		"Wert",
@@ -56,6 +58,7 @@ func (w *PipeWriter) Write(d DataProvider) error {
 	data := []string{
 		d.ID(),
 		d.Status(),
+		d.Source(),
 		d.DecisionTime().Local().Format("2006-01-02 15:04:05"),
 		fmt.Sprintf("%v", int(d.Age().Seconds()/86400)),
 		fmt.Sprintf("%0.2f", d.Value()),
