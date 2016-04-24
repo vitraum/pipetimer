@@ -12,7 +12,7 @@ import (
 func (t *Pipetimer) FetchDeals(filterName string, filterID int) (pipedrive.Deals, error) {
 	if filterName != "" && filterID == 0 {
 		var err error
-		filterID, err = t.api.GetFilterIDByName(filterName)
+		filterID, err = t.API.GetFilterIDByName(filterName)
 		if err != nil {
 			return nil, err
 		}
@@ -20,13 +20,13 @@ func (t *Pipetimer) FetchDeals(filterName string, filterID int) (pipedrive.Deals
 		return nil, errors.New("Don't provide filter name and id simultainously")
 	}
 
-	res, err := t.api.FetchDealsFromPipeline(t.id, filterID)
+	res, err := t.API.FetchDealsFromPipeline(t.id, filterID)
 	return res, err
 }
 
 // FilterPipelineChanges fetches the updates for the given deals and processes them
 func (t *Pipetimer) FilterPipelineChanges(deals []pipedrive.Deal) (pipedrive.PipelineChangeResults, error) {
-	changes, err := t.api.FetchPipelineChanges(deals, t.Stages)
+	changes, err := t.API.FetchPipelineChanges(deals, t.Stages)
 	if err != nil {
 		return nil, err
 	}

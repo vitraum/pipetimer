@@ -8,7 +8,7 @@ type Pipetimer struct {
 
 	name string
 	id   int
-	api  *pipedrive.API
+	API  *pipedrive.API
 }
 
 // Option is a type for options given to NewPipeTimer
@@ -22,7 +22,7 @@ func NewPipeTimer(apiOptions []pipedrive.Option, options ...Option) (*Pipetimer,
 		return nil, err
 	}
 	timer := &Pipetimer{
-		api: api,
+		API: api,
 	}
 
 	for _, option := range options {
@@ -32,13 +32,13 @@ func NewPipeTimer(apiOptions []pipedrive.Option, options ...Option) (*Pipetimer,
 		}
 	}
 
-	plID, err := timer.api.GetPipelineIDByName(timer.name)
+	plID, err := timer.API.GetPipelineIDByName(timer.name)
 	if err != nil {
 		return nil, err
 	}
 	timer.id = plID
 
-	timer.Stages, err = timer.api.RetrieveStagesForPipeline(timer.id)
+	timer.Stages, err = timer.API.RetrieveStagesForPipeline(timer.id)
 	if err != nil {
 		return nil, err
 	}

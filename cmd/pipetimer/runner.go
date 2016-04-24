@@ -121,7 +121,7 @@ func main() {
 	csv.WriteHeader()
 	defer csv.Flush()
 	for _, dealFlow := range updates {
-		csv.Write(dealFlow)
+		csv.Write(pipetimer.NewChangeResultConverter(dealFlow, timer.API))
 
 		if !verbose {
 			continue
