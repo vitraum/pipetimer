@@ -67,7 +67,7 @@ func (w *PipeWriter) Write(d DataProvider) error {
 		pit := ""
 		duration := ""
 		for _, update := range d.DealUpdates() {
-			if update.Phase == stage.Name {
+			if update.Phase == stage.Name && update.PiT.Time.Before(d.DecisionTime()) {
 				pit = update.PiT.String()
 				duration = fmt.Sprintf("%d", int(update.Duration/86400))
 			}

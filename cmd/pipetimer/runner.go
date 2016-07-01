@@ -129,7 +129,8 @@ func main() {
 		fmt.Printf("+ %d %s\n", dealFlow.Deal.Id, dealFlow.Deal.Title)
 		for _, stage := range timer.Stages {
 			for _, update := range dealFlow.Updates {
-				if stage.Name == update.Phase {
+				decisionTime := dealFlow.DecisionTime()
+				if stage.Name == update.Phase && update.PiT.Time.Before(decisionTime) {
 					when := update.PiT.Local().Format("2006-01-02 15:04")
 					fmt.Printf("  %s -> %s %d", stage.Name, when, int(update.Duration/86400))
 					if update.PhaseTouchdowns > 1 {
