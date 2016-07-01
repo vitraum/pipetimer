@@ -6,8 +6,10 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/rickar/cal"
 	"github.com/vitraum/golang-pipedrive"
 
 	"github.com/vitraum/pipetimer"
@@ -34,6 +36,9 @@ func main() {
 
 	var verbose = false
 	flag.BoolVar(&verbose, "verbose", verbose, "enable verbose output")
+
+	var workDays = false
+	flag.BoolVar(&workDays, "workdays", workDays, "calculate differences in working days ")
 
 	var seed int64
 	flag.Int64Var(&seed, "seed", 0, "to be used for random sampling")
@@ -93,11 +98,28 @@ func main() {
 	}
 
 	var deals pipedrive.Deals
+	dealIDs := flag.Args()
+
+	if len(dealIDs) > 0 {
+		for _, dealString := range dealIDs {
+			dealID, err := strconv.Atoi(dealString)
+			if err != nil {
+				panic(err)
+			}
+			for _, deal := range alldeals {
+				if deal.Id == dealID {
+					deals = append(deals, deal)
+					break
+				}
+			}
+		}
+	}
+
 	if sample > 0 {
-		for i := 0; i < sample; i++ {
+		for i := len(deals); i < sample; i++ {
 			deals = append(deals, alldeals[rand.Intn(len(alldeals))])
 		}
-	} else {
+	} else if len(dealIDs) == 0 {
 		deals = alldeals
 	}
 
@@ -120,8 +142,24 @@ func main() {
 	csv := pipetimer.NewPipeWriter(file, timer.Stages)
 	csv.WriteHeader()
 	defer csv.Flush()
+
+	var ageCalculator func(a, b time.Time) time.Duration
+	if workDays {
+		c := cal.NewCalendar()
+		cal.AddGermanHolidays(c)
+		c.Observed = cal.ObservedExact
+		ageCalculator = func(a, b time.Time) time.Duration {
+			return time.Duration(c.CountWorkdays(b, a)*86400) * time.Second
+		}
+
+	} else {
+		ageCalculator = func(a, b time.Time) time.Duration {
+			return a.Sub(b)
+		}
+	}
+
 	for _, dealFlow := range updates {
-		csv.Write(pipetimer.NewChangeResultConverter(dealFlow, timer.API))
+		csv.Write(pipetimer.NewChangeResultConverter(dealFlow, timer.API, ageCalculator))
 
 		if !verbose {
 			continue

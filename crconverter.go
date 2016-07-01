@@ -16,17 +16,21 @@ type sourceCache struct {
 	sync.Mutex
 }
 
+type AgeCalculator func(a, b time.Time) time.Duration
+
 var cache sourceCache
 
 type ChangeResultConverter struct {
 	pipedrive.PipelineChangeResult
 	sourceMapping sourceMap
+	ageCalculator AgeCalculator
 }
 
-func NewChangeResultConverter(cr pipedrive.PipelineChangeResult, api *pipedrive.API) *ChangeResultConverter {
+func NewChangeResultConverter(cr pipedrive.PipelineChangeResult, api *pipedrive.API, age AgeCalculator) *ChangeResultConverter {
 	return &ChangeResultConverter{
 		cr,
 		fetchSourceMapping(api),
+		age,
 	}
 }
 
@@ -47,7 +51,7 @@ func (cr *ChangeResultConverter) Source() string {
 }
 
 func (cr *ChangeResultConverter) Age() time.Duration {
-	return cr.DecisionTime().Sub(cr.Deal.Added.Time)
+	return cr.ageCalculator(cr.DecisionTime(), cr.Deal.Added.Time)
 }
 
 func (cr *ChangeResultConverter) DealUpdates() pipedrive.DealFlowUpdates {
