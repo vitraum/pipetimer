@@ -159,7 +159,7 @@ func main() {
 	}
 
 	for _, dealFlow := range updates {
-		csv.Write(pipetimer.NewChangeResultConverter(dealFlow, timer.API, ageCalculator))
+		csv.Write(pipetimer.NewChangeResultConverter(dealFlow, timer.API, ageCalculator, timer.Stages))
 
 		if !verbose {
 			continue

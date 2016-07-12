@@ -10,6 +10,8 @@ import (
 
 type sourceMap map[string]string
 
+type stageMap map[int]string
+
 type sourceCache struct {
 	smap   sourceMap
 	filled bool
@@ -24,13 +26,20 @@ type ChangeResultConverter struct {
 	pipedrive.PipelineChangeResult
 	sourceMapping sourceMap
 	ageCalculator AgeCalculator
+	stages        stageMap
 }
 
-func NewChangeResultConverter(cr pipedrive.PipelineChangeResult, api *pipedrive.API, age AgeCalculator) *ChangeResultConverter {
+func NewChangeResultConverter(cr pipedrive.PipelineChangeResult, api *pipedrive.API, age AgeCalculator, stages pipedrive.Stages) *ChangeResultConverter {
+	stageMapping := stageMap{}
+	for _, stage := range stages {
+		stageMapping[stage.Id] = stage.Name
+	}
+
 	return &ChangeResultConverter{
 		cr,
 		fetchSourceMapping(api),
 		age,
+		stageMapping,
 	}
 }
 
@@ -48,6 +57,15 @@ func (cr *ChangeResultConverter) Value() float64 {
 
 func (cr *ChangeResultConverter) Source() string {
 	return cr.Deal.Source
+}
+
+func (cr *ChangeResultConverter) LastStage() string {
+	stageName, ok := cr.stages[cr.Deal.Stage]
+	if ok {
+		return stageName
+	} else {
+		return ""
+	}
 }
 
 func (cr *ChangeResultConverter) Age() time.Duration {
