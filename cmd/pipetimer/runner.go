@@ -53,15 +53,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if token == "" {
-		fmt.Println("token is mandatory")
-		flag.Usage()
-		os.Exit(1)
-	}
-
 	apiOptions := []pipedrive.Option{
 		pipedrive.HTTPFetcher,
-		pipedrive.FixedToken(token),
+	}
+
+	if token != "" {
+		apiOptions = append(apiOptions, pipedrive.FixedToken(token))
+	} else {
+		apiOptions = append(apiOptions, pipedrive.EnvToken(""))
 	}
 
 	if verbose {
