@@ -1,6 +1,10 @@
 package pipetimer
 
-import "github.com/vitraum/golang-pipedrive"
+import (
+	"sort"
+
+	"github.com/vitraum/golang-pipedrive"
+)
 
 // Pipetimer bundles all logic to generate CSV exports for a Pipedrive pipe
 type Pipetimer struct {
@@ -42,6 +46,10 @@ func NewPipeTimer(apiOptions []pipedrive.Option, options ...Option) (*Pipetimer,
 	if err != nil {
 		return nil, err
 	}
+
+	sort.Slice(
+		timer.Stages,
+		func(i, j int) bool { return timer.Stages[i].OrderNr < timer.Stages[j].OrderNr })
 
 	return timer, nil
 }
