@@ -164,12 +164,13 @@ func main() {
 			continue
 		}
 		fmt.Printf("+ %d %s\n", dealFlow.Deal.Id, dealFlow.Deal.Title)
+		decisionTime := dealFlow.DecisionTime()
 		for _, stage := range timer.Stages {
 			for _, update := range dealFlow.Updates {
-				decisionTime := dealFlow.DecisionTime()
 				if stage.Name == update.Phase && update.PiT.Time.Before(decisionTime) {
 					when := update.PiT.Local().Format("2006-01-02 15:04")
-					fmt.Printf("  %s -> %s %d", stage.Name, when, int(update.Duration/86400))
+					sinceStart := update.PiT.Local().Sub(dealFlow.Deal.Added.Time)
+					fmt.Printf("  %s -> %s %0.2f", stage.Name, when, sinceStart.Seconds()/86400)
 					if update.PhaseTouchdowns > 1 {
 						fmt.Printf(" (%dx)", update.PhaseTouchdowns)
 					}
@@ -178,5 +179,10 @@ func main() {
 				}
 			}
 		}
+		sinceStart := dealFlow.DecisionTime().Sub(dealFlow.Deal.Added.Time)
+		fmt.Printf("  %s = %0.2f\n",
+			dealFlow.Deal.Added.Format("2006-01-02"),
+			sinceStart.Seconds()/86400)
 	}
+
 }

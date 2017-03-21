@@ -19,6 +19,7 @@ type PipeWriter struct {
 type DataProvider interface {
 	ID() string
 	Age() time.Duration
+	Added() time.Time
 	Status() string
 	Source() string
 	LastStage() string
@@ -51,6 +52,7 @@ func (w *PipeWriter) WriteHeader() error {
 	for _, stage := range w.stages {
 		columnNames = append(columnNames, stage.Name)
 		columnNames = append(columnNames, stage.Name+" Dauer")
+		columnNames = append(columnNames, stage.Name+" Ersteintritt")
 	}
 	return w.csv.Write(columnNames)
 }
@@ -69,13 +71,19 @@ func (w *PipeWriter) Write(d DataProvider) error {
 	for _, stage := range w.stages {
 		pit := ""
 		duration := ""
+		firstContact := ""
 		for _, update := range d.DealUpdates() {
 			if update.Phase == stage.Name && update.PiT.Time.Before(d.DecisionTime()) {
 				pit = update.PiT.String()
 				duration = fmt.Sprintf("%d", int(update.Duration/86400))
+				if firstContact == "" {
+					fCsecs := update.PiT.Sub(d.Added()).Seconds()
+					firstContact = fmt.Sprintf("%d", int(fCsecs/86400))
+				}
 			}
 		}
-		data = append(data, pit, duration)
+
+		data = append(data, pit, duration, firstContact)
 	}
 	return w.csv.Write(data)
 }

@@ -51,6 +51,10 @@ func (cr *ChangeResultConverter) Status() string {
 	return cr.Deal.Status
 }
 
+func (cr *ChangeResultConverter) Added() time.Time {
+	return cr.Deal.Added.Time
+}
+
 func (cr *ChangeResultConverter) Value() float64 {
 	return cr.Deal.Value
 }
